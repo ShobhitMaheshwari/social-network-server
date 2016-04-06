@@ -1,11 +1,10 @@
-from snippets.models import Snippet
+from snippets.models import Snippet, Friendship
 from rest_framework import generics
 from django.contrib.auth.models import User
 from snippets.serializers import UserSerializer, SnippetSerializer, FriendSerializer
 from rest_framework import permissions
 from snippets.permissions import IsOwnerOrReadOnly, IsOwnerOrFriend
 from django.contrib.auth.hashers import make_password
-import logging
 
 
 class SnippetList(generics.ListCreateAPIView):
@@ -18,20 +17,12 @@ class SnippetList(generics.ListCreateAPIView):
 
     def get_queryset(self):
         snippet_list = Snippet.objects.all()
-        logger = logging.getLogger(__name__)
-        logger.debug(self.request.user.id)
-        logger.debug(self.request.user.username)
-        logger.debug(self.request.user.password)
-        logger.debug(self.request.user.friends)
-        logger.debug(self.request.user.snippets)
-        temp = User.objects.get(id = self.request.user.id)
-        logger.debug(temp.friends)
-        self_user = UserSerializer(temp)
-        logger.debug(self_user.friends)
-        logger.debug(type(self_user))
-
-
-        return [x for x in snippet_list if x.owner.id in [y for y in self.request.user.friends.friend]]
+        friends = Friendship.objects.filter(creator = self.request.user.id)
+        return [x for x in snippet_list
+                if ((x.owner.id in [y.friend.id for y in
+                                    [z for z in friends if z.approved == True]]) or
+                    (x.owner.id == self.request.user.id))
+                ]
 
 
 class SnippetDetail(generics.RetrieveUpdateDestroyAPIView):
@@ -57,6 +48,7 @@ class UserDetail(generics.RetrieveAPIView):
 class FriendshipList(generics.ListCreateAPIView):
     permission_classes = (permissions.IsAuthenticatedOrReadOnly,)
     serializer_class = FriendSerializer
+    queryset = Friendship.objects.all()
 
     def perform_create(self, serializer):
         serializer.save(creator=self.request.user)
