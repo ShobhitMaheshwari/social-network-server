@@ -51,4 +51,12 @@ class FriendshipList(generics.ListCreateAPIView):
     queryset = Friendship.objects.all()
 
     def perform_create(self, serializer):
-        serializer.save(creator=self.request.user)
+
+        queryset = Friendship.objects.filter(creator = self.request.user).filter(friend = self.request.data['friend'])
+        revqueryset = Friendship.objects.filter(creator=self.request.data['friend']).filter(friend=self.request.user)
+        if (not queryset) and (revqueryset):
+            serializer.save(creator = self.request.user, approved = True)
+            revqueryset[0].approved = True
+            revqueryset[0].save()
+        elif (not queryset) and (not revqueryset):
+            serializer.save(creator=self.request.user)
