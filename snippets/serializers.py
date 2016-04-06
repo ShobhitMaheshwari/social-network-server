@@ -9,8 +9,13 @@ class SnippetSerializer(serializers.ModelSerializer):
         owner = serializers.ReadOnlyField(source='owner.username')
 
 class UserSerializer(serializers.ModelSerializer):
-    snippets = serializers.PrimaryKeyRelatedField(many=True, queryset=Snippet.objects.all())
+    snippets = serializers.PrimaryKeyRelatedField(many=True, queryset=Snippet.objects.all(), required=False)
 
     class Meta:
         model = User
-        fields = ('id', 'username', 'snippets')
+        fields = ('id', 'username', 'snippets', 'password')
+        extra_kwargs = {
+            'password': {
+                'write_only': True,
+            },
+        }
