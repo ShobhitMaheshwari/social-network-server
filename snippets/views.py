@@ -60,3 +60,9 @@ class FriendshipList(generics.ListCreateAPIView):
             revqueryset[0].save()
         elif (not queryset) and (not revqueryset):
             serializer.save(creator=self.request.user)
+
+
+class UserLogin(generics.ListAPIView):
+    permission_classes = (permissions.IsAuthenticated,)
+    queryset = User.objects.all()
+    serializer_class = UserSerializer
