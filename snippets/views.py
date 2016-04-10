@@ -62,7 +62,10 @@ class FriendshipList(generics.ListCreateAPIView):
             serializer.save(creator=self.request.user)
 
 
-class UserLogin(generics.ListAPIView):
+class UserLogin(generics.RetrieveAPIView):
     permission_classes = (permissions.IsAuthenticated,)
     queryset = User.objects.all()
     serializer_class = UserSerializer
+
+    def get_object(self):
+        return self.request.user

@@ -6,7 +6,7 @@ from django.contrib.auth.models import User
 class SnippetSerializer(serializers.ModelSerializer):
     class Meta:
         model = Snippet
-        fields = ('id', 'title', 'message', 'created')
+        fields = ('id', 'title', 'message', 'created', 'owner')
         owner = serializers.ReadOnlyField(source='owner.username')
 
 
