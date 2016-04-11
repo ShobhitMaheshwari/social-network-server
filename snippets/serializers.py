@@ -45,8 +45,9 @@ class UserSerializer(serializers.ModelSerializer):
 
 
 class FriendSerializer(serializers.ModelSerializer):
+    creator = serializers.ReadOnlyField(source='creator.username', required=False)
     class Meta:
         model = Friendship
-        fields = ('id', 'created', 'friend', 'approved')
-        creator = serializers.ReadOnlyField(source='creator.username')
+        fields = ('id', 'created', 'friend', 'approved', 'creator')
+
         friend = serializers.ReadOnlyField(source='friend.username')
